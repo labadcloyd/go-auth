@@ -13,5 +13,10 @@ func main() {
 
     routes.Setup(app)
 
+    // returning 404 after wrong route
+	app.Use(func(c *fiber.Ctx) error {
+        return c.Status(fiber.StatusNotFound).SendString("Error 404: not found")
+    })
+
     log.Fatal(app.Listen(":3000"))
 }
