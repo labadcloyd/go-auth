@@ -1,20 +1,17 @@
 package main
 
 import (
-    "log"
-    "github.com/gofiber/fiber/v2"
+	"go-auth/database"
+	"go-auth/routes"
+	"log"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
+    database.Connect()
     app := fiber.New()
 
-    app.Get("/", func (c *fiber.Ctx) error {
-        return c.SendString("Hello, World!")
-    })
-
-    app.Get("/:value", func(c *fiber.Ctx) error {
-        return c.SendString("value: " + c.Params("value"))
-    })
+    routes.Setup(app)
 
     log.Fatal(app.Listen(":3000"))
 }
