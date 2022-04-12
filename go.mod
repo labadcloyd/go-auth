@@ -5,9 +5,11 @@ go 1.18
 require (
 	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/gofiber/fiber/v2 v2.31.0
+	github.com/joho/godotenv v1.4.0
 	gorm.io/driver/mysql v1.3.3
 	gorm.io/gorm v1.23.4
 )
+
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
