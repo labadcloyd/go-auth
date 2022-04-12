@@ -99,3 +99,38 @@ func Login(c *fiber.Ctx) error {
 		"message": "Successfully logged in",
 	})
 }
+
+func User(c *fiber.Ctx) error {
+	cookie := c.Cookies("jwt")
+
+	// parsing token
+	token, err := jwt.ParseWithClaims(
+		cookie, 
+		&jwt.StandardClaims{}, 
+		func(t *jwt.Token) (interface{}, error) {
+			return []byte(SecretKey), nil
+		},
+	)
+	if err != nil {
+		log.Println(err)
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"message": "Invalid token",
+		})
+	}
+	
+	claims := token.Claims.(*jwt.StandardClaims)
+
+	user := models.User{}
+
+	if err := database.DB.Where("id = ?", claims.Issuer).First(&user).Error;
+		err != nil {
+			log.Println(err)
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"message": "No user found",
+			})
+		}
+
+	return c.JSON(user)
+}
