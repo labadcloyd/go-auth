@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"go-auth/database"
+	"go-auth/helpers"
 	"go-auth/models"
 	"log"
 
@@ -9,21 +10,30 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Signup(c *fiber.Ctx) error {
-	var data = map[string]string{}
 
+func Signup(c *fiber.Ctx) error {
+	// data validation
+	data := new(ReqSignUp)
 	if err := c.BodyParser(&data); err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	errors := helpers.ValidateStruct(*data)
+
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
-	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 10)
-
+	// hashing password and formatting data
+	password, _ := bcrypt.GenerateFromPassword([]byte(data.Password), 10)
 	user := models.User {
-		Name: data["name"],
-		Email: data["email"],
+		Name: data.Name,
+		Email: data.Email,
 		Password: password,
 	}
 
+	// saving user
 	if err := database.DB.Create(&user).Error; err != nil {
 		return err
 	}
