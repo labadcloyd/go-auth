@@ -29,7 +29,7 @@ func validatePassword(fl validator.FieldLevel) bool {
 }
 
 func ValidateStruct(data interface{}) []*ErrorResponse {
-	Validate.RegisterValidation("requiredCharacters", validatePassword)
+	Validate.RegisterValidation("missingRequiredCharacters", validatePassword)
 	var errors []*ErrorResponse
 	err := Validate.Struct(data)
 	if err != nil {

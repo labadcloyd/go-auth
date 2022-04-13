@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"go-auth/database"
+	"go-auth/helpers"
 	"go-auth/models"
 	"log"
 	"strconv"
@@ -14,18 +15,21 @@ import (
 
 
 func Login(c *fiber.Ctx) error {
-
-	var reqData = map[string]string{}
-
+	// data validation
+	reqData := new(ReqLogin)
 	if err := c.BodyParser(&reqData); err != nil {
 		return err
+	}
+	errors := helpers.ValidateStruct(*reqData)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
 	var user = models.User{}
 
 	// checking if user exists
 	if err := database.
-		DB.Where("email = ?", reqData["email"]).First(&user).Error; 
+		DB.Where("email = ?", reqData.Email).First(&user).Error; 
 		err != nil {
 			c.Status(fiber.StatusNotFound)
 			return c.JSON(fiber.Map{
@@ -40,7 +44,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	// checking if password matches user
-	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(reqData["password"])); err != nil {
+	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(reqData.Password)); err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
 			"message": "inccorect password",
